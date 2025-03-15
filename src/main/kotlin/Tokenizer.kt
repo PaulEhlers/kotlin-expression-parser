@@ -79,10 +79,18 @@ class Tokenizer() {
     }
 
     private fun getCurrentChar() : Char {
+        if (cursor >= input.length) {
+            throw TokenizerException("Unexpected end of input while reading character.")
+        }
+
         return this.input[this.cursor]
     }
 
     private fun consumeChar() : Char {
+        if (cursor >= input.length) {
+                throw TokenizerException("Unexpected end of input while reading character.")
+        }
+
         val char = getCurrentChar()
         this.cursor++
         return char
@@ -117,22 +125,18 @@ class Tokenizer() {
     }
 
     private fun processString() : String {
-        try {
-            consumeChar()
-            val string : StringBuilder = StringBuilder()
+        consumeChar()
+        val string : StringBuilder = StringBuilder()
 
-            while(getCurrentChar() != '\"') {
-                if(cursor >= input.length) {
-                    throw TokenizerException("Missing closing \" in string")
-                }
-                string.append(consumeChar().toString())
+        while(getCurrentChar() != '\"') {
+            if(cursor >= input.length) {
+                throw TokenizerException("Missing closing \" in string")
             }
-            consumeChar()
-
-            return string.toString()
-        } catch (e: StringIndexOutOfBoundsException) {
-            throw TokenizerException("Missing closing \" in string")
+            string.append(consumeChar().toString())
         }
+        consumeChar()
+
+        return string.toString()
     }
 
     private fun processIdentifier(): String {
