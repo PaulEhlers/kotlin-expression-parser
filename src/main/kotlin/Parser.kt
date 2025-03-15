@@ -46,18 +46,17 @@ class Parser(
         return tokenTypes.contains(lookahead?.type)
     }
 
-    private fun parseExpression() : Expression {
-        return this.parseAddition()
-    }
+    private fun parseExpression() : Expression = parseAddition()
+
 
     private fun parseAddition() : Expression {
-        var left = parseCall()
+        var left = parseMultiplication()
 
         while (isType(TokenType.PLUS, TokenType.MINUS)) {
             left = BinaryExpr(
                 left = left,
                 operator = eat(TokenType.PLUS, TokenType.MINUS),
-                right = parseCall()
+                right = parseMultiplication()
             )
         }
 
@@ -65,7 +64,7 @@ class Parser(
     }
 
     private fun parseCall() : Expression {
-        val callee = parseMultiplication()
+        val callee = parseBasic()
         val calleeValue : String? = when(callee) {
             is BinaryExpr -> null
             is CallExpr -> null
@@ -112,7 +111,7 @@ class Parser(
     }
 
     private fun parseExponentiation() : Expression {
-        var left = parseBasic()
+        var left = parseCall()
 
         while (isType(TokenType.EXPONENTIAL)) {
             left = BinaryExpr(
@@ -139,6 +138,7 @@ class Parser(
                 value = eat(TokenType.NUMBER).value.toDouble()
             )
         }
+
 
         if(isType(TokenType.IDENTIFIER)) {
             return IdentifierExpr(
