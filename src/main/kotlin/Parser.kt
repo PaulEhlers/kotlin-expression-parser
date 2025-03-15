@@ -2,7 +2,7 @@ package org.example
 
 sealed class Expression
 
-data class NumberExpr(val value: String) : Expression()
+data class NumberExpr(val value: Double) : Expression()
 
 data class IdentifierExpr(val name: String) : Expression()
 
@@ -13,11 +13,11 @@ data class BinaryExpr(
 ) : Expression()
 
 data class CallExpr(
-    val function: Expression,
+    val function: String,
     val arguments: List<Expression>
 ) : Expression()
 
-data class NestedExpr(val inner: Expression) : Expression()
+data class NestedExpr(val inner: String) : Expression()
 
 class ParseException(message: String) : Exception(message)
 
@@ -66,10 +66,17 @@ class Parser(
 
     private fun parseCall() : Expression {
         val callee = parseMultiplication()
+        val calleeValue : String? = when(callee) {
+            is BinaryExpr -> null
+            is CallExpr -> null
+            is NestedExpr -> null
+            is IdentifierExpr -> callee.name
+            is NumberExpr -> callee.value.toString()
+        }
 
         if (isType(TokenType.NUMBER, TokenType.IDENTIFIER)) {
             return CallExpr(
-                function = callee,
+                function = calleeValue!!,
                 arguments = listOf(parseCall())
             )
         }
@@ -84,7 +91,7 @@ class Parser(
             }
 
             this.eat(TokenType.PARENTHESES_CLOSE)
-            return CallExpr(function = callee, arguments = arguments)
+            return CallExpr(function = calleeValue!!, arguments = arguments)
         }
 
         return callee
@@ -129,7 +136,7 @@ class Parser(
 
         if (isType(TokenType.NUMBER)) {
             return NumberExpr(
-                value = eat(TokenType.NUMBER).value
+                value = eat(TokenType.NUMBER).value.toDouble()
             )
         }
 
@@ -143,7 +150,7 @@ class Parser(
             val expression = eat(TokenType.STRING).value
             val innerExpression = Parser().parse(expression)
 
-            return NestedExpr(inner = innerExpression)
+            return NestedExpr(inner = expression)
         }
 
         throw ParseException("Unknown expression")

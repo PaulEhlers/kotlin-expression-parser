@@ -10,7 +10,7 @@ class ParserTest {
     fun `test simple number`() {
         val expr = Parser().parse("42")
         assertTrue(expr is NumberExpr)
-        assertEquals("42", (expr as NumberExpr).value)
+        assertEquals(42.0, (expr as NumberExpr).value)
     }
 
     @Test
@@ -26,8 +26,8 @@ class ParserTest {
         assertTrue(expr is BinaryExpr)
         val binary = expr as BinaryExpr
         assertEquals(TokenType.PLUS, binary.operator.type)
-        assertEquals("1", (binary.left as NumberExpr).value)
-        assertEquals("2", (binary.right as NumberExpr).value)
+        assertEquals(1.0, (binary.left as NumberExpr).value)
+        assertEquals(2.0, (binary.right as NumberExpr).value)
     }
 
     @Test
@@ -36,13 +36,13 @@ class ParserTest {
         assertTrue(expr is BinaryExpr)
         val add = expr as BinaryExpr
         assertEquals(TokenType.PLUS, add.operator.type)
-        assertEquals("1", (add.left as NumberExpr).value)
+        assertEquals(1.0, (add.left as NumberExpr).value)
 
         assertTrue(add.right is BinaryExpr)
         val multiply = add.right as BinaryExpr
         assertEquals(TokenType.MULTIPLY, multiply.operator.type)
-        assertEquals("2", (multiply.left as NumberExpr).value)
-        assertEquals("3", (multiply.right as NumberExpr).value)
+        assertEquals(2.0, (multiply.left as NumberExpr).value)
+        assertEquals(3.0, (multiply.right as NumberExpr).value)
     }
 
     @Test
@@ -51,13 +51,13 @@ class ParserTest {
         assertTrue(expr is BinaryExpr)
         val first = expr as BinaryExpr
         assertEquals(TokenType.EXPONENTIAL, first.operator.type)
-        assertEquals("2", (first.left as NumberExpr).value)
+        assertEquals(2.0, (first.left as NumberExpr).value)
 
         assertTrue(first.right is BinaryExpr)
         val second = first.right as BinaryExpr
         assertEquals(TokenType.EXPONENTIAL, second.operator.type)
-        assertEquals("3", (second.left as NumberExpr).value)
-        assertEquals("4", (second.right as NumberExpr).value)
+        assertEquals(3.0, (second.left as NumberExpr).value)
+        assertEquals(4.0, (second.right as NumberExpr).value)
     }
 
     @Test
@@ -66,13 +66,13 @@ class ParserTest {
         assertTrue(expr is BinaryExpr)
         val multiply = expr as BinaryExpr
         assertEquals(TokenType.MULTIPLY, multiply.operator.type)
-        assertEquals("3", (multiply.right as NumberExpr).value)
+        assertEquals(3.0, (multiply.right as NumberExpr).value)
 
         assertTrue(multiply.left is BinaryExpr)
         val addition = multiply.left as BinaryExpr
         assertEquals(TokenType.PLUS, addition.operator.type)
-        assertEquals("1", (addition.left as NumberExpr).value)
-        assertEquals("2", (addition.right as NumberExpr).value)
+        assertEquals(1.0, (addition.left as NumberExpr).value)
+        assertEquals(2.0, (addition.right as NumberExpr).value)
     }
 
     @Test
@@ -80,11 +80,10 @@ class ParserTest {
         val expr = Parser().parse("max(1, 2)")
         assertTrue(expr is CallExpr)
         val call = expr as CallExpr
-        assertTrue(call.function is IdentifierExpr)
-        assertEquals("max", (call.function as IdentifierExpr).name)
+        assertEquals("max", call.function)
         assertEquals(2, call.arguments.size)
-        assertEquals("1", (call.arguments[0] as NumberExpr).value)
-        assertEquals("2", (call.arguments[1] as NumberExpr).value)
+        assertEquals(1.0, (call.arguments[0] as NumberExpr).value)
+        assertEquals(2.0, (call.arguments[1] as NumberExpr).value)
     }
 
     @Test
@@ -92,16 +91,16 @@ class ParserTest {
         val expr = Parser().parse("max(min(1, 2), 3)")
         assertTrue(expr is CallExpr)
         val outerCall = expr as CallExpr
-        assertEquals("max", (outerCall.function as IdentifierExpr).name)
+        assertEquals("max", outerCall.function)
 
         assertTrue(outerCall.arguments[0] is CallExpr)
         val innerCall = outerCall.arguments[0] as CallExpr
-        assertEquals("min", (innerCall.function as IdentifierExpr).name)
+        assertEquals("min", innerCall.function)
 
-        assertEquals("1", (innerCall.arguments[0] as NumberExpr).value)
-        assertEquals("2", (innerCall.arguments[1] as NumberExpr).value)
+        assertEquals(1.0, (innerCall.arguments[0] as NumberExpr).value)
+        assertEquals(2.0, (innerCall.arguments[1] as NumberExpr).value)
 
-        assertEquals("3", (outerCall.arguments[1] as NumberExpr).value)
+        assertEquals(3.0, (outerCall.arguments[1] as NumberExpr).value)
     }
 
     @Test
@@ -109,10 +108,7 @@ class ParserTest {
         val expr = Parser().parse("\"1 + 2\"")
         assertTrue(expr is NestedExpr)
         val innerExpr = (expr as NestedExpr).inner
-        assertTrue(innerExpr is BinaryExpr)
-        val addition = innerExpr as BinaryExpr
-        assertEquals("1", (addition.left as NumberExpr).value)
-        assertEquals("2", (addition.right as NumberExpr).value)
+        assertEquals("1 + 2", innerExpr)
     }
 
     @Test
@@ -121,16 +117,16 @@ class ParserTest {
         assertTrue(expr is BinaryExpr)
         val add = expr as BinaryExpr
         assertEquals(TokenType.PLUS, add.operator.type)
-        assertEquals("2", (add.left as NumberExpr).value)
+        assertEquals(2.0, (add.left as NumberExpr).value)
 
         val multiply = add.right as BinaryExpr
         assertEquals(TokenType.MULTIPLY, multiply.operator.type)
-        assertEquals("3", (multiply.left as NumberExpr).value)
+        assertEquals(3.0, (multiply.left as NumberExpr).value)
 
         val exp = multiply.right as BinaryExpr
         assertEquals(TokenType.EXPONENTIAL, exp.operator.type)
-        assertEquals("4", (exp.left as NumberExpr).value)
-        assertEquals("2", (exp.right as NumberExpr).value)
+        assertEquals(4.0, (exp.left as NumberExpr).value)
+        assertEquals(2.0, (exp.right as NumberExpr).value)
     }
 
     @Test
@@ -138,23 +134,22 @@ class ParserTest {
         val expr = Parser().parse("sigma(\"x\", 1, 5)")
         assertTrue(expr is CallExpr)
         val call = expr as CallExpr
-        assertEquals("sigma", (call.function as IdentifierExpr).name)
+        assertEquals("sigma", call.function)
 
         assertEquals(3, call.arguments.size)
 
         val arg1 = call.arguments[0]
         assertTrue(arg1 is NestedExpr)
         val inner1 = (arg1 as NestedExpr).inner
-        assertTrue(inner1 is IdentifierExpr)
-        assertEquals("x", (inner1 as IdentifierExpr).name)
+        assertEquals("x", inner1)
 
         val arg2 = call.arguments[1]
         assertTrue(arg2 is NumberExpr)
-        assertEquals("1", (arg2 as NumberExpr).value)
+        assertEquals(1.0, (arg2 as NumberExpr).value)
 
         val arg3 = call.arguments[2]
         assertTrue(arg3 is NumberExpr)
-        assertEquals("5", (arg3 as NumberExpr).value)
+        assertEquals(5.0, (arg3 as NumberExpr).value)
     }
 
 
