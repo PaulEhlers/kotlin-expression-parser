@@ -47,7 +47,7 @@ class EvaluatorTest {
     @Test
     fun `test sin function`() {
         val result = Evaluator.compile("sin(pi / 2)", defaultEnv)
-        assertEquals(1.0, result, 0.0001) // Toleranz wegen Rundung
+        assertEquals(1.0, result, 0.0001)
     }
 
     @Test
@@ -123,35 +123,30 @@ class EvaluatorTest {
 
     @Test
     fun `test left-associative division`() {
-        // Division ist linksassoziativ: (10 / 2) / 5 = 1
         val result = Evaluator.compile("10 / 2 / 5", defaultEnv)
         assertEquals(1.0, result)
     }
 
     @Test
     fun `test left-associative subtraction`() {
-        // Subtraktion ist linksassoziativ: (10 - 2) - 3 = 5
         val result = Evaluator.compile("10 - 2 - 3", defaultEnv)
         assertEquals(5.0, result)
     }
 
     @Test
     fun `test exponentiation associativity`() {
-        // Exponentiation ist rechtsassoziativ: 2 ^ (3 ^ 2) = 2 ^ 9 = 512
         val result = Evaluator.compile("2 ^ 3 ^ 2", defaultEnv)
         assertEquals(512.0, result)
     }
 
     @Test
     fun `test division by zero`() {
-        // Division durch 0 liefert in Double-Arithmetik Infinity
         val result = Evaluator.compile("1 / 0", defaultEnv)
         assertEquals(Double.POSITIVE_INFINITY, result)
     }
 
     @Test
     fun `test missing closing parentheses`() {
-        // Fehlende schließende Klammer soll einen ParseException auslösen
         assertThrows<ParseException> {
             Evaluator.compile("2 + (3 * 4", defaultEnv)
         }
@@ -159,7 +154,6 @@ class EvaluatorTest {
 
     @Test
     fun `test invalid character input`() {
-        // Ungültiges Zeichen sollte einen TokenizerException (oder ParseException) werfen
         assertThrows<TokenizerException> {
             Evaluator.compile("2 + @", defaultEnv)
         }
@@ -167,7 +161,6 @@ class EvaluatorTest {
 
     @Test
     fun `test function with too many arguments`() {
-        // sqrt erwartet genau einen Parameter; zwei Argumente sollten einen Fehler werfen
         val ex = assertThrows<RuntimeException> {
             Evaluator.compile("sqrt(1, 2)", defaultEnv)
         }
@@ -176,24 +169,19 @@ class EvaluatorTest {
 
     @Test
     fun `test nested expression with whitespace`() {
-        // Testet, ob Leerzeichen innerhalb eines verschachtelten Ausdrucks korrekt geparst werden
         val result = Evaluator.compile("\" 3 + 4 * 2 \"", defaultEnv)
-        // Erwartet: 3 + (4 * 2) = 11
+        // Expected: 3 + (4 * 2) = 11
         assertEquals(11.0, result)
     }
 
     @Test
     fun `test complex combined expression`() {
-        // Kombination mehrerer Operationen:
-        // sqrt(16) = 4, sin(pi/2) = 1, 2 ^ 3 = 8, (8 - 1) = 7 => 4 + 1*7 = 11
         val result = Evaluator.compile("sqrt(16) + sin(pi/2) * (2 ^ 3 - 1)", defaultEnv)
         assertEquals(11.0, result)
     }
 
     @Test
     fun `test explicit nested function call using implicit syntax`() {
-        // Hier wird der innere Funktionsaufruf implizit (ohne Klammern) geparst und
-        // dann explizit als Argument an sin übergeben: sin(cos 0)
         val result = Evaluator.compile("sin(cos 0)", defaultEnv)
         // cos(0) = 1, sin(1) ≈ 0.84147
         assertEquals(Math.sin(1.0), result, 0.0001)
@@ -254,7 +242,7 @@ class EvaluatorTest {
     @Test
     fun `test expression with environment variables`() {
         val env = Environment.default()
-        // Setze x = 3 und y = 16
+        // Set x = 3 and y = 16
         env.define("x", NumberValue(3.0))
         env.define("y", NumberValue(16.0))
         // (3+5)^2 - sqrt(16) = 8^2 - 4 = 64 - 4 = 60
@@ -265,7 +253,7 @@ class EvaluatorTest {
     @Test
     fun `test expression with sqrt negative edge case`() {
         val env = Environment.default()
-        // Setze x = 3 und y = -4 (sqrt(-4) ergibt NaN)
+        // Set x = 3 and y = -4 (sqrt(-4) equals NaN)
         env.define("x", NumberValue(3.0))
         env.define("y", NumberValue(-4.0))
         val result = Evaluator.compile("(x+5)^2 - sqrt(y)", env)
@@ -275,7 +263,7 @@ class EvaluatorTest {
     @Test
     fun `test expression with zero values`() {
         val env = Environment.default()
-        // Setze x = 0 und y = 0
+        // Set x = 0 and y = 0
         env.define("x", NumberValue(0.0))
         env.define("y", NumberValue(0.0))
         // (0+5)^2 - sqrt(0) = 25 - 0 = 25
@@ -286,7 +274,7 @@ class EvaluatorTest {
     @Test
     fun `test expression with non-integer values`() {
         val env = Environment.default()
-        // Setze x = 2.5 und y = 2.25
+        // Set x = 2.5 and y = 2.25
         env.define("x", NumberValue(2.5))
         env.define("y", NumberValue(2.25))
         // (2.5+5)^2 - sqrt(2.25) = (7.5)^2 - 1.5 = 56.25 - 1.5 = 54.75
@@ -297,7 +285,7 @@ class EvaluatorTest {
     @Test
     fun `test missing environment variable`() {
         val env = Environment.default()
-        // Nur y ist definiert, x fehlt
+        // Only y is defined, x missing
         env.define("y", NumberValue(16.0))
         val ex = assertThrows<RuntimeException> {
             Evaluator.compile("(x+5)^2 - sqrt(y)", env)

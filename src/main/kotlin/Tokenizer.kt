@@ -22,8 +22,8 @@ data class Token(
 class TokenizerException(message: String) : Exception()
 
 class Tokenizer() {
-    var cursor : Int = 0
-    var input : String = ""
+    private var cursor : Int = 0
+    private var input : String = ""
 
     fun read(input: String) {
         this.input = input
@@ -107,7 +107,7 @@ class Tokenizer() {
     }
 
     private fun processNumber() : String {
-        var number : StringBuilder = StringBuilder()
+        val number : StringBuilder = StringBuilder()
         var hasPoint = false
 
         while(cursor < input.length  && (getCurrentChar().isDigit() || getCurrentChar() == '.')) {

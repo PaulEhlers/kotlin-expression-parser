@@ -33,11 +33,11 @@ class Environment (
         fun default(): Environment {
             val environment = Environment()
 
-            // Konstanten
+            // Constants
             environment.define("pi", NumberValue(PI))
             environment.define("e", NumberValue(E))
 
-            // Einfache 1-Argument Funktionen
+            // 1-Argument functions
             listOf(
                 "sin" to ::sin,
                 "cos" to ::cos,
@@ -51,11 +51,11 @@ class Environment (
             ).forEach { (name, func) ->
                 environment.define(name, FunctionValue(1) { args ->
                     if (args.size != 1) throw RuntimeException("$name expects one number")
-                    func((args[0] as Double))
+                    func(args[0])
                 })
             }
 
-            // Zwei-Argument Funktionen
+            // Two-Argument functions
             listOf(
                 "log" to { a: Double, b: Double -> log(a, b) },
                 "max" to { a: Double, b: Double -> max(a, b) },
@@ -65,7 +65,7 @@ class Environment (
                     if (args.size != 2) {
                         throw RuntimeException("$name expects two numbers")
                     }
-                    func((args[0] as Double), args[1] as Double)
+                    func(args[0], args[1])
                 })
             }
 
