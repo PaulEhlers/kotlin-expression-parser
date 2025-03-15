@@ -2,34 +2,82 @@ package org.example
 
 import kotlin.math.*
 
+/**
+ * Base class for values in the evaluator.
+ */
 sealed class Value
 
+/**
+ * Represents a numeric value.
+ *
+ * @property value the double value
+ */
 data class NumberValue(val value: Double) : Value()
 
+/**
+ * Represents a function value.
+ *
+ * @property parameters the number of expected arguments
+ * @property implementation a lambda implementing the function logic
+ */
 data class FunctionValue(
     val parameters: Int,
     val implementation: (List<Double>) -> Double
 ) : Value()
 
-class Environment (
+/**
+ * Represents an evaluation environment for variables and functions.
+ *
+ * Each environment can have an optional parent for nested lookups.
+ */
+class Environment(
     private var parent: Environment? = null,
 ) {
     private val fields: MutableMap<String, Value> = mutableMapOf()
 
-    fun addParent(parent: Environment?) : Environment {
+    /**
+     * Adds or replaces the parent environment.
+     *
+     * @param parent the parent environment to use for lookups
+     * @return this environment
+     */
+    fun addParent(parent: Environment?): Environment {
         this.parent = parent
         return this
     }
 
+    /**
+     * Looks up a value by its identifier.
+     *
+     * @param name the variable or function name
+     * @return the associated value
+     * @throws RuntimeException if the identifier is unknown
+     */
     fun lookup(name: String): Value {
         return fields[name] ?: parent?.lookup(name)
         ?: throw RuntimeException("Unknown identifier \"$name\"")
     }
 
+    /**
+     * Defines a new variable or function.
+     *
+     * @param name the identifier
+     * @param value the value to associate
+     */
     fun define(name: String, value: Value) {
         fields[name] = value
     }
+
     companion object {
+        /**
+         * Returns a default environment with predefined constants and functions.
+         *
+         * Constants: pi, e.
+         * One-argument functions: sin, cos, tan, sqrt, abs, exp, round, floor, ceil.
+         * Two-argument functions: log, max, min.
+         *
+         * @return the default environment
+         */
         fun default(): Environment {
             val environment = Environment()
 
