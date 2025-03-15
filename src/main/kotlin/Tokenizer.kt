@@ -46,19 +46,20 @@ class Tokenizer() {
             return singleDigitToken
         }
 
-        return when(currentChar) {
-            '0','1','2', '3', '4', '5', '6', '7', '8', '9' -> Token(
+        return when {
+            currentChar.isDigit() -> Token(
                 type = TokenType.NUMBER,
                 value = processNumber()
             )
-            '\"' -> Token(
+            currentChar == '\"' -> Token(
                 type = TokenType.STRING,
                 value = processString()
             )
-            else -> Token(
+            currentChar.isLetter() -> Token(
                 type = TokenType.IDENTIFIER,
                 value = processIdentifier()
             )
+            else -> throw TokenizerException("Unknown character: '$currentChar'")
         }
     }
 
